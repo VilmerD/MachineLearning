@@ -1,0 +1,9 @@
+load('mats\A1_data.mat', 'Xaudio', 'Ttest', 'Ttrain', 'fs')
+load 'lambdaopt.mat'
+
+Yclean = lasso_denoise(Ttest, Xaudio, lambdaopt);
+
+Y = [Ttrain; Ttest];
+soundsc(Y);
+ 
+save('denoised_audio.mat', 'Y')
