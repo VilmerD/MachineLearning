@@ -27,9 +27,7 @@ axi = [lambda_min, lambda_max, RMSEmin, RMSEmax];
 semilogx(lambda_grid, RMSEval, 'bs-', 'DisplayName', 'RMSEval');
 hold on;  
 semilogx(lambda_grid, RMSEest, 'r^-', 'DisplayName', 'RMSEest');
-q = 5;
-semilogx(lambda_grid, RMSEest/q + RMSEval, 'DisplayName', ...
-    sprintf('RMSEest/%i + RMSEval', q))
+
 plot([lambdaopt, lambdaopt], [RMSEmax*2, 0], 'k--', 'DisplayName', 'LambdaOpt');
 axis(axi);
 
