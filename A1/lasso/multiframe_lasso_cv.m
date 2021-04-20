@@ -40,6 +40,7 @@ SEest = zeros(K,Nlam);
 
 % Set indexing parameter for the cross-validation indexing
 Nval = floor(N/K);
+Nest = N - Nval;
 cvidx = (1:Nval)';
 cvhop = Nval;
 
@@ -81,7 +82,7 @@ for kframe = 1:Nframes % First loop over frames
 
             % Calculate estimation error for this estimate
             SEest(kfold, klam) = SEest(kfold, klam) + ...
-                norm(test - Xest*what)^2/Nval; 
+                norm(test - Xest*what)^2/Nest; 
 
             % Set current estimate as old estimate for next lambda-value.
             wold = what;

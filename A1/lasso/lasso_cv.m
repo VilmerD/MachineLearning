@@ -26,6 +26,7 @@ SEest = zeros(K, Nlam);
 randomind = randperm(N); % Select random indices for validation and estimation
 location = 0; % Index start when moving through the folds
 Nval = floor(N/K); % How many samples per fold
+Nest = N - Nval;
 cvidx = (1:Nval)';
 hop = Nval; % How many samples to skip when moving to the next fold.
 
@@ -56,7 +57,7 @@ for kfold = 1:K
         SEval(kfold, klam) = norm(tval - Xval*what)^2/Nval; 
         
         % Calculate estimation error for this estimate
-        SEest(kfold, klam) = norm(test - Xest*what)^2/Nval; 
+        SEest(kfold, klam) = norm(test - Xest*what)^2/Nest; 
         
         % Set current estimate as old estimate for next lambda-value.
         wold = what;

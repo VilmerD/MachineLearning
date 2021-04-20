@@ -8,11 +8,11 @@ t = Ttrain(1:xi);
 for k = 1:lx
     lambda_max = max(lambda_max, abs(Xaudio(:, k)'*t));
 end
-N_lambda = 10;
+N_lambda = 50;
 lambda_grid = exp(linspace(log(lambda_min), log(lambda_max), N_lambda));
 
 %% Training
-K = 4;
+K = 8;
 [wopt, lambdaopt, RMSEval, RMSEest] = ...
     multiframe_lasso_cv(Ttrain, Xaudio, lambda_grid, K);
 

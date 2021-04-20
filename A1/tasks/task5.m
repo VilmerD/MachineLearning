@@ -8,7 +8,7 @@ lambda_max = lambda_min;
 for k = 1:lx
     lambda_max = max(lambda_max, abs(X(:, k)'*t));
 end
-N_lambda = 30;
+N_lambda = 60;
 lambda_grid = exp(linspace(log(lambda_min), log(lambda_max), N_lambda));
 
 % K-fold optimization
