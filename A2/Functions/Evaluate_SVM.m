@@ -1,4 +1,4 @@
-function [M, missrate] = SVM_classification_results(y, T)
+function [M, missrate] = Evaluate_SVM(y, T)
 ids = [0, 1];
 nids = length(ids);
 N = length(y);

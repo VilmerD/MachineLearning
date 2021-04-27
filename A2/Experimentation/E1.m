@@ -11,14 +11,17 @@ m = mean(train_data_01, 1);
 zm_train_data = train_data_01 - m;
 
 %% PCA
-[U, S, V] = svd(zm_train_data);
+[U, ~, ~] = svd(zm_train_data);
 U2 = U(:, [1, 2]);
-train_data_2D = U2'*zm_train_data;
+save('mats/basis.mat', 'U2');
+%% Projection
+train_data_2D = U2'*train_data_01;
 
 %% Plot
-figure(211)
+f211 = figure(211);
 plot(train_data_2D(1, idx0), train_data_2D(2, idx0), 'rs')
 hold on;
 plot(train_data_2D(1, idx1), train_data_2D(2, idx1), 'gs')
 xlabel('dimension 1'), ylabel('dimension 2'), legend('t = 0', 't = 1')
 title('Dimensionality reduced train data')
+set(f211, 'Position', [100 100 500 300])

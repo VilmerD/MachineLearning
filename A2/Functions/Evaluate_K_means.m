@@ -1,4 +1,4 @@
-function [M, missrate] = K_means_classification_results(y, T, L)
+function [M, missrate] = Evaluate_K_means(y, T, L)
 K = max(y);
 N = length(y);
 M = zeros(K, 5);
@@ -24,5 +24,5 @@ for k = 1:K
     M(k, end) = ntk0*(Lk == 1) + ntk1*(Lk == 0);
 end
 nmissclassified = sum(M(:, end));
-missrate = nmissclassified/N;
+missrate = nmissclassified/N*100;
 end
