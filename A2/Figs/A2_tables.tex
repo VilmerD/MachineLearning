@@ -1,0 +1,203 @@
+
+%---Preamble------------------------------------------
+
+\documentclass[a4paper,11pt]{article}
+\usepackage[swedish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{color}
+\usepackage{amssymb,amsmath}
+\usepackage{algorithm,algorithmic}
+\usepackage{longtable, graphics,epsfig}
+
+\pagestyle{empty}
+
+%---Formattering--------------------------------------
+
+\setlength{\hoffset}{-.5in}
+\setlength{\voffset}{-1in}
+
+\setlength{\marginparsep}{0pt}
+\setlength{\marginparwidth}{0pt}
+
+\addtolength{\textwidth}{70pt}
+\addtolength{\textheight}{144pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{\baselineskip}
+
+%---Kommandon-----------------------------------------
+
+\renewcommand{\thefootnote}{\alph{footnote}}
+\newcommand{\nypa}{${}$\hspace{5pt}}
+
+\newcommand{\ww}{\mathbf w}
+\newcommand{\xx}{\mathbf x}
+\newcommand{\LL}{\mathcal L}
+
+%%-----NCO-formulas----------------------------------------------------
+
+\include{TK_defs}
+%\newcommand{\ba}{{\bf a}} %-------Bold-face symbols------
+%\newcommand{\bu}{{\bf u}}
+%\newcommand{\bp}{{\bf p}}
+%\newcommand{\bn}{{\bf n}}
+%\newcommand{\bv}{{\bf v}}
+%\newcommand{\bt}{{\bf t}}
+%\newcommand{\bx}{{\bf x}}
+%\newcommand{\by}{{\bf y}}
+%\newcommand{\bff}{{\bf f}}
+%\newcommand{\bro}{\boldsymbol{\rho}}
+%\newcommand{\bmy}{\boldsymbol{\mu}}
+%\newcommand{\bsig}{\boldsymbol{\sigma}^2}
+%\newcommand{\bsigopt}{\boldsymbol{\sigma}^{2\ast}}
+%
+%\newcommand{\sign}{\operatorname{sign}}%-------Operators------
+%\newcommand{\supp}{\operatorname{supp}}
+%\newcommand{\Area}{\operatorname{Area}}
+%\newcommand{\yttre}{\operatorname{ext}}
+%\newcommand{\indre}{\operatorname{int}}
+%\newcommand{\grad}{\operatorname{grad}}
+%\newcommand{\trace}{\operatorname{tr}}
+%\newcommand{\ind}{\operatorname{ind}}
+%\newcommand{\divergens}{\operatorname{div}}
+%\newcommand{\dist}{\operatorname{dist}}
+%\newcommand{\argmin}{\operatorname*{arg\,min}}
+%
+%
+%
+%\newcommand{\real}{\mathbf{R}}%-------Symbols------
+%\newcommand{\phin}{\frac{\nabla \phi}{| \nabla \phi |}}
+%\newcommand{\phit}{\frac{\partial \phi}{\partial t}}
+%\newcommand{\p}{\partial}
+%\newcommand{\ds}{d\sigma}
+%
+%\newcommand{\surf}{\circ}
+%\newcommand{\vol}{\bullet}
+%\newcommand{\Oint}{\indre(\Gamma)}
+%\newcommand{\Oext}{\yttre(\Gamma)}
+%\newcommand{\mint}{\mu_{\indre}}
+%\newcommand{\mext}{\mu_{\yttre}}
+%\newcommand{\sint}{\sigma_{\indre}^2}
+%\newcommand{\sext}{\sigma_{\yttre}^2}
+%\newcommand{\sintopt}{\sigma_{\indre}^{2\ast}}
+%\newcommand{\sextopt}{\sigma_{\yttre}^{2\ast}}
+%
+%\newcommand{\bzero}{\Big|_{s=0}}
+%\newcommand{\normaldisp}{v_n}
+%\newcommand{\dE}{\delta E (\Gamma,\psi)}
+%\newcommand{\nnphi}{| \nabla \phi |}
+%\newcommand{\scurve}{\Sigma}
+
+%%-----end-NCO-formulas------------------------------------------------
+
+
+
+%---Br�dtext------------------------------------------
+
+\begin{document}
+
+\begin{table}[ht]
+\caption{K-means classification results}
+\centering
+\begin{tabular}{c | c c c c | c }
+\hline\hline
+Training data & Cluster & \# '0' & \# '1'  & Assigned to class & \# misclassified \\ [0.5ex] % inserts table %heading
+\hline
+& 1 & ? & ? & ? & ? \\
+& \vdots &  \vdots& \vdots & \vdots  & \vdots \\  
+& K & ?  & ? & ? & ?\\ 
+\hline 
+$N_\text{train} = $ ?  & \multicolumn{4}{r}{Sum misclassified:} & ? \\ [.5ex]
+\hline 
+ & \multicolumn{4}{r}{Misclassification rate (\%):} & ?\\ [.5ex]
+\hline\hline
+%
+%
+Testing data & Cluster & \# '0' & \# '1'  & Assigned to class & \# misclassified \\ [0.5ex] % inserts table %heading
+\hline
+& 1 & ? & ? & ? & ? \\
+& \vdots &  \vdots& \vdots & \vdots  & \vdots \\  
+& K & ?  & ? & ? & ?\\ 
+\hline 
+$N_\text{test} = $ ?  & \multicolumn{4}{r}{Sum misclassified:} & ? \\ [.5ex]
+\hline 
+ & \multicolumn{4}{r}{Misclassification rate (\%):} & ?\\ [.5ex]
+\hline\hline
+%
+\end{tabular}
+\label{table:kmeanstable}
+\end{table}
+%
+
+
+
+
+\vspace{1em}
+\begin{table}[ht]
+\caption{Linear SVM classification results}
+\centering
+\begin{tabular}{c | c | c c c}
+\hline\hline
+Training data & Predicted class & True class: & \# '0' & \# '1' \\ [0.5ex] % inserts table %heading
+\hline
+& '0' & & ? & ? \\
+& '1' & & ? & ?\\ 
+\hline 
+$N_\text{train} = $ ?  & \multicolumn{3}{r}{Sum misclassified: } & ? \\ [.5ex]
+\hline 
+ & \multicolumn{3}{r}{Misclassification rate (\%):} & ? \\ [.5ex]
+\hline\hline
+%
+Testing data & Predicted class & True class: & \# '0' & \# '1' \\ [0.5ex] % inserts table %heading
+\hline
+& '0' & & ? & ? \\
+& '1' & & ? & ?\\ 
+\hline 
+$N_\text{test} = $ ?  & \multicolumn{3}{r}{Sum misclassified:} & ?  \\ [.5ex]
+\hline 
+ & \multicolumn{3}{r}{Misclassification rate (\%): } &? \\ [.5ex]
+\hline\hline
+%
+\end{tabular}
+\label{table:svmtable}
+\end{table}
+%
+\vspace{1em}
+
+
+
+
+
+
+
+\begin{table}[H]
+\caption{Gaussian kernel SVM classification results}
+\centering
+\begin{tabular}{c | c | c c c}
+\hline\hline
+Training data & Predicted class & True class: & \# '0' & \# '1' \\ [0.5ex] % inserts table %heading
+\hline
+& '0' & & ? & ? \\
+& '1' & & ? & ?\\ 
+\hline 
+$N_\text{train} = $ ?  & \multicolumn{3}{r}{Sum misclassified: } & ? \\ [.5ex]
+\hline 
+ & \multicolumn{3}{r}{Misclassification rate (\%):} & ? \\ [.5ex]
+\hline\hline
+%
+Testing data & Predicted class & True class: & \# '0' & \# '1' \\ [0.5ex] % inserts table %heading
+\hline
+& '0' & & ? & ? \\
+& '1' & & ? & ?\\ 
+\hline 
+$N_\text{test} = $ ?  & \multicolumn{3}{r}{Sum misclassified:} & ?  \\ [.5ex]
+\hline 
+ & \multicolumn{3}{r}{Misclassification rate (\%): } &? \\ [.5ex]
+\hline\hline
+%
+\end{tabular}
+\label{table:kernelsvmtable}
+\end{table}
+%
+
+\end{document} 
