@@ -58,7 +58,7 @@ gamm = .95;
 % Tolerance in policy evaluation - ALLOWED TO BE CHANGED
 % Experiment with different tolerances (try as small as 1e-4, up to as
 % large as 1e4). Does the tolerance affect the final policy (SEE EXERCISE 6)?
-pol_eval_tol = 1e0;
+pol_eval_tol = 1e-1;
 
 % Updates per second (when watching the agent play).
 updates_per_sec = 5;
