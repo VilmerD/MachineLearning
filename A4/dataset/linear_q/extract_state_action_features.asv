@@ -114,15 +114,13 @@ for action = 1 : 3 % Evaluate all the different actions (left, forward, right).
 end
 end
 
-function free_directions = is_surrounded(grid, head_loc, movement_dir)
-free_left = ~restricted_direction(grid, head_loc, movement_dir - 1);
-free_right = ~restricted_direction(grid, head_loc, movement_dir + 1);
-free_forward = ~restricted_direction(grid, head_loc, movement_dir);
-free_directions = free_left + free_right + free_forward;
+function surrounded = is_surrounded(grid, head_loc, movement_dir)
+restricted_left = restricted_direction(grid, head_loc, movement_dir - 1);
+restricted_right = restricted_direction(grid, head_loc, movement_dir + 1);
+restricted_forward = restricted_direction(grid, head_loc, movement_dir);
 end
 
-function restricted = restricted_direction(grid, head, d)
-[M, N] = size(grid);
+function restricted = restricted_direction(grid, head_loc, d)
 d = mod(d, 4);
 if d == 0
     d = 4;
@@ -130,18 +128,21 @@ end
 switch d
     case 1
         grid_slice = grid(1:head(1)-1, head(2));
-        obstacles = grid_slice == 1;
+        pos = find(grid_slice == 1, 1, 'last');
+        dist = head(1) - pos - 1;
     case 2
         grid_slice = grid(head(1), head(2)+1:N);
-        obstacles = grid_slice == 1;
+        pos = head(2) + find(grid_slice == 1, 1, 'first');
+        dist = pos - head(2) - 1;
     case 3
         grid_slice = grid(head(1)+1:M, head(2));
-        obstacles = grid_slice == 1;
+        pos = head(1) + find(grid_slice == 1, 1, 'first');
+        dist = pos - head(1) - 1;
     case 4
         grid_slice = grid(head(1), 1:head(2)-1);
-        obstacles = grid_slice == 1;
+        pos = find(grid_slice == 1, 1, 'last');
+        dist = head(2) - pos - 1;
 end
-restricted = s(obstacles) > 1;
 end
 
 % Finds the body of the snake

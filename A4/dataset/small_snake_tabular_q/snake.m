@@ -45,20 +45,20 @@ nbr_apples = 1;
 % ----- YOU MAY CHANGE SETTINGS BELOW UNLESS OTHERWISE NOTIFIED! ----------
 
 % Specify whether to test the agent or not (false --> train agent)
-test_agent = false; % set to true when you want to test your agent.
+test_agent = true; % set to true when you want to test your agent.
 
 % Updates per second (when watching the agent play).
 updates_per_sec = 5; 
 
 % Set visualization settings (what you as programmer will see when the agent is playing)
 % Hint: Set to 0 once you want to train for many episodes.
-show_fraction = 0; % 1: show everything, 0: show nothing, 0.1: show every tenth, and so on
+show_fraction = 1; % 1: show everything, 0: show nothing, 0.1: show every tenth, and so on
 
 % Stuff related to learning agent (YOU SHOULD EXPERIMENT A LOT WITH THESE
 % SETTINGS - SEE EXERCISE 6).
 rewards = struct('default', 0, 'apple', 1, 'death', -10); % Reward signal
-gamm    = 0.9;  % Discount factor in Q-learning
-alph    = 0.001; % Learning rate in Q-learning (automatically set to zero during testing)
+gamm    = 0.90;  % Discount factor in Q-learning
+alph    = 0.1; % Learning rate in Q-learning (automatically set to zero during testing)
 eps     = 0.001; % Random action selection probability in epsilon-greedy Q-learning (automatically set to zero during testing)
 
 % Optionally play around also with these settings.
@@ -214,10 +214,11 @@ for i = 1 : nbr_ep
             % we set future Q-values at terminal states equal to zero].
             % Hint: Q(s,a) <-- (1 - alpha) * Q(s,a) + sample
             % can be rewritten as Q(s,a) <-- Q(s,a) + alpha * (sample - Q(s,a))
-            sample                    = nan % replace nan with something appropriate.
-            pred                      = nan % replace nan with something appropriate.
+            sample                    = reward;
+            pred                      = Q_vals(state_idx, action);
             td_err                    = sample - pred; % don't change this.
-            Q_vals(state_idx, action) = Q_vals(state_idx, action) % + ... (fill in blanks) 
+            Q_vals(state_idx, action) = Q_vals(state_idx, action) + ...
+                alph*td_err;
 
             % -- DO NOT CHANGE ANYTHING BELOW UNLESS OTHERWISE NOTIFIED ---
             % -- (IMPLEMENT NON-TERMINAL Q-UPDATE FURTHER DOWN) -----------
@@ -270,10 +271,11 @@ for i = 1 : nbr_ep
         % Q_vals(state_idx, action)
         % Hint: Q(s,a) <-- (1 - alpha) * Q(s,a) + sample
         % can be rewritten as Q(s,a) <-- Q(s,a) + alpha * (sample - Q(s,a))
-        sample                    = nan % replace nan with something appropriate
-        pred                      = nan % replace nan with something appropriate 
+        sample                    = reward + gamm*max(Q_vals(next_state_idx, :));
+        pred                      = Q_vals(state_idx, action);
         td_err                    = sample - pred; % don't change this!
-        Q_vals(state_idx, action) = Q_vals(state_idx, action) % + ... (fill in blanks) 
+        Q_vals(state_idx, action) = Q_vals(state_idx, action) + ...
+            alph*td_err;
         
         % ------- DO NOT CHANGE ANYTHING BELOW ----------------------
     end
