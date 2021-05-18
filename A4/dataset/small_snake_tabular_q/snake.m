@@ -56,15 +56,15 @@ show_fraction = 1; % 1: show everything, 0: show nothing, 0.1: show every tenth,
 
 % Stuff related to learning agent (YOU SHOULD EXPERIMENT A LOT WITH THESE
 % SETTINGS - SEE EXERCISE 6).
-rewards = struct('default', 0, 'apple', 1, 'death', -10); % Reward signal
-gamm    = 0.90;  % Discount factor in Q-learning
-alph    = 0.1; % Learning rate in Q-learning (automatically set to zero during testing)
+rewards = struct('default', -0.05, 'apple', 1, 'death', -10); % Reward signal
+gamm    = 0.900;  % Discount factor in Q-learning
+alph    = 0.200; % Learning rate in Q-learning (automatically set to zero during testing)
 eps     = 0.001; % Random action selection probability in epsilon-greedy Q-learning (automatically set to zero during testing)
 
 % Optionally play around also with these settings.
-alph_update_iter   = 0;   % 0: Never update alpha, Positive integer k: Update alpha every kth episode
+alph_update_iter   = 1000;   % 0: Never update alpha, Positive integer k: Update alpha every kth episode
 alph_update_factor = 0.5; % At alpha update: new alpha = old alpha * alph_update_factor
-eps_update_iter    = 0;   % 0: Never update eps, Positive integer k: Update eps every kth episode
+eps_update_iter    = 1000;   % 0: Never update eps, Positive integer k: Update eps every kth episode
 eps_update_factor  = 0.5; % At eps update: new eps = old eps * eps_update_factor
 
 % ------- DO NOT CHANGE ANYTHING BELOW UNLESS OTHERWISE NOTIFIED --------
@@ -217,8 +217,7 @@ for i = 1 : nbr_ep
             sample                    = reward;
             pred                      = Q_vals(state_idx, action);
             td_err                    = sample - pred; % don't change this.
-            Q_vals(state_idx, action) = Q_vals(state_idx, action) + ...
-                alph*td_err;
+            Q_vals(state_idx, action) = Q_vals(state_idx, action) + alph*td_err;
 
             % -- DO NOT CHANGE ANYTHING BELOW UNLESS OTHERWISE NOTIFIED ---
             % -- (IMPLEMENT NON-TERMINAL Q-UPDATE FURTHER DOWN) -----------
@@ -274,8 +273,7 @@ for i = 1 : nbr_ep
         sample                    = reward + gamm*max(Q_vals(next_state_idx, :));
         pred                      = Q_vals(state_idx, action);
         td_err                    = sample - pred; % don't change this!
-        Q_vals(state_idx, action) = Q_vals(state_idx, action) + ...
-            alph*td_err;
+        Q_vals(state_idx, action) = Q_vals(state_idx, action) + alph*td_err;
         
         % ------- DO NOT CHANGE ANYTHING BELOW ----------------------
     end

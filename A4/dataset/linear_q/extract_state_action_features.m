@@ -1,6 +1,6 @@
 function [state_action_feats, prev_grid, prev_head_loc] = extract_state_action_features(prev_grid, grid, prev_head_loc, nbr_feats)
 %
-% Code may be changed in this function, but only where it states that it is 
+% Code may be changed in this function, but only where it states that it is
 % allowed to do so.
 %
 % Function to extract state-action features, based on current and previous
@@ -12,11 +12,11 @@ function [state_action_feats, prev_grid, prev_head_loc] = extract_state_action_f
 %                 time-step: prev_grid = grid, else: prev_grid != grid.
 % grid          - Current grid (game screen), N-by-N matrix. If initial
 %                 time-step: prev_grid = grid, else: prev_grid != grid.
-% prev_head_loc - The previous location of the head of the snake (from the 
+% prev_head_loc - The previous location of the head of the snake (from the
 %                 previous time-step). If initial time-step: Assumed known,
 %                 else: inferred in function "update_snake_grid.m" (so in
 %                 practice it will always be known in this function).
-% nbr_feats     - Number of state-action features per action. Set this 
+% nbr_feats     - Number of state-action features per action. Set this
 %                 value appropriately in the calling script "snake.m", to
 %                 match the number of state-action features per action you
 %                 end up using.
@@ -80,9 +80,9 @@ prev_head_loc = head_loc;
 
 % ------------- YOU MAY CHANGE SETTINGS BELOW! --------------------------
 
-% HERE BEGINS YOUR STATE-ACTION FEATURE ENGINEERING. THE CODE BELOW IS 
-% ALLOWED TO BE CHANGED IN ACCORDANCE WITH YOUR CHOSEN FEATURES. 
-% Some skeleton code is provided to help you get started. Also, have a 
+% HERE BEGINS YOUR STATE-ACTION FEATURE ENGINEERING. THE CODE BELOW IS
+% ALLOWED TO BE CHANGED IN ACCORDANCE WITH YOUR CHOSEN FEATURES.
+% Some skeleton code is provided to help you get started. Also, have a
 % look at the function "get_next_info" (see bottom of this function).
 % You may find it useful.
 
@@ -92,27 +92,152 @@ for action = 1 : 3 % Evaluate all the different actions (left, forward, right).
     [next_head_loc, next_move_dir] = get_next_info(action, movement_dir, head_loc);
     
     % Replace this to fit the number of state-action features per features
-    % you choose (3 are used below), and of course replace the randn() 
+    % you choose (3 are used below), and of course replace the randn()
     % by something more sensible.
     
     % angle to apple?
-    vn = apple_angle(grid, head_loc);
-    d = movement_direction(next_move_dir);
-    coth = vn*d';
-    state_action_feats(1, action) = 2*(coth > 0) - 1;
+    state_action_feats(1, action) = ...
+        apple_angle(grid, head_loc, next_move_dir);
     % Angle is 1 if snake is moving towards apple, -1 if moving away. Thus
     % a good weight is positive. Also, it only cares if the angle is
     % positive or negative, so it moves in straight lines.
     
     % obsticle if taking action
-    obstacle = grid(next_head_loc(1), next_head_loc(2)) == 1;
-    state_action_feats(2, action) = obstacle - 1;
-    % The amount of obsticles should be 0 for a good action. Thus a good
-    % weight is negative
-
+    state_action_feats(2, action) = obstacles(grid, next_head_loc);
+    % The snake should avoid obstacles, so a good action this feat is
+    % negative, and thus a good weight is negative.
+    
+    state_action_feats(3, action) = moving_towards_itself(grid, ...
+        head_loc, next_move_dir);
+    
     state_action_feats = state_action_feats(1:nbr_feats, :);
 end
 end
+
+% Angle to apple
+function cb = apple_angle(grid, head_location, movement_direction)
+% Input:    grid, head_location, movement_direction
+% Returns:  (binary) 1 if the snake is moving towards the apple and
+%           -1 if it is moving away from the apple
+[rows_apple, cols_apple] = find(grid == -1);
+apple = [rows_apple, cols_apple];
+v = apple-head_location;
+vn = v/norm(v);
+
+d = vectorized_movement_direction(movement_direction);  % Vectorized
+c = vn*d';                                              % cos(angle)
+cb = (c > 0) - (c < 0);
+end
+
+function b = between(u, v, x)
+s1 = sign(det([u; v]));
+s2 = sign(det([u; x]));
+b = s1 == s2;
+end
+
+function vis = visible(grid, head, target)
+[row, col] = body_position(grid);
+pos = [row(2:end), col(2:end)];
+vectors = pos - head;
+vectors = vectors./sqrt(vectors(:, 1).^2 + vectors(:, 2).^2);
+ref = vectors(1, :);
+vectors = vectors(2:end, :);
+nparts = numel(row) - 2;
+for k = 1:nparts
+    u = vectors(k, :);
+    b = between(ref, u, target);
+    if b
+        vis = false;
+        return
+    end
+end
+vis = true;
+end
+
+% How many obstacles there are at a position in the grid
+function on = obstacles(grid, pos)
+% Input:    grid, pos
+% Returns:  (binary) -1 if there is no obstacle at pos, and 1 if
+%           there is an obstacle at pos
+obs = grid(pos(1), pos(2)) == 1;
+on = 2*obs-1;
+end
+
+% Finds the body of the snake
+function [row, col] = body_position(grid)
+[row, col] = find(grid(2:end-1, 2:end-1) == 1);
+row = row + 1;
+col = col + 1;
+end
+
+% Find the mass centrum of the snake
+function mc = mass_centrum(grid)
+[row_snake, col_snake] = body_position(grid);
+mc = mean([row_snake, col_snake], 1);
+end
+
+% Finds the angle between mass centrum and snake move direction
+function cb = mass_centrum_angle(grid, head_location, movement_direction)
+% Input:    grid, head_location, movement_direction
+% Returns:  ()
+mc = mass_centrum(grid);
+v = mc - head_location;
+vn = v/norm(v);
+
+d = vectorized_movement_direction(movement_direction);  % Vectorized
+c = vn*d';
+cb = (c > 0.8660);
+end
+
+% Finds if the snake is moving directly towards any of the body parts
+function bool = moving_towards_itself(grid, head, movement_direction)
+grid(head(1), head(2)) = 0;
+[row, col] = body_position(grid);
+vectors = [row, col] - head;
+vectors = vectors./sqrt(vectors(:, 1).^2 + vectors(:, 2).^2);
+d = vectorized_movement_direction(movement_direction);  % Vectorized
+v = vectors*d';
+bool = sum(v == 1);
+end
+
+% Looks in the direction to see if there is an object there
+function obj = look(grid, direction, head)
+pos = head;
+direction = direction / direction(1);
+found_obj = false;
+while ~found_obj
+    pos = pos + direction;
+    pos_discrete1 = floor(pos);
+    pos_discrete2 = roof(pos);
+    try
+        obj1 = grid(pos_discrete1(1), pos_discrete1(2));
+        obj2 = grid(pos_discrete2(1), pos_discrete2(2));
+    catch
+        obj1 = 1;
+    end
+    if obj1 ~= 0
+        found_obj = true;
+    end
+end
+end
+
+% Movement direction
+function d = vectorized_movement_direction(move_dir)
+% Input:    move_dir
+% Returns:  vectorized movement direction in 2d
+move_dir = mod(move_dir, 4);
+switch move_dir
+    case 1
+        d = [-1, 0];
+    case 2
+        d = [0, 1];
+    case 3
+        d = [1 0];
+    case 0
+        d = [0 -1];
+end
+end
+
 
 function free_directions = is_surrounded(grid, head_loc, movement_dir)
 free_left = ~restricted_direction(grid, head_loc, movement_dir - 1);
@@ -142,22 +267,6 @@ switch d
         obstacles = grid_slice == 1;
 end
 restricted = s(obstacles) > 1;
-end
-
-% Finds the body of the snake
-function [row, col] = body_position(grid)
-[row, col] = find(grid(2:end-1, 2:end-1) == 1);
-row = row + 1;
-col = col + 1;
-end
-
-% Angle to apple
-function vn = apple_angle(grid, next_head_loc)
-    [rows_apple, cols_apple] = find(grid == -1);
-    apple = [rows_apple, cols_apple];
-    v = apple-next_head_loc;
-    delta = norm(v);
-    vn = v/delta;    
 end
 
 % Computes how long the snake can move in the direction d untill it hits an
@@ -191,24 +300,7 @@ if numel(dist) == 0
 end
 end
 
-% Movement direction
-function d = movement_direction(move_dir)
-    move_dir = mod(move_dir, 4);
-    switch move_dir
-        case 1
-            d = [-1, 0];
-        case 2
-            d = [0, 1];
-        case 3
-            d = [1 0];
-        case 0
-            d = [0 -1];
-    end
-end
-
-%
-% DO NOT CHANGE ANYTHING IN THE FUNCTION get_next_info BELOW!
-%
+% Gets the information for the next state
 function [next_head_loc, next_move_dir] = get_next_info(action, movement_dir, head_loc)
 % Function to infer next haed location and movement direction
 
@@ -220,7 +312,7 @@ if movement_dir == 1 % NORTH
     if action == 1     % left
         next_head_loc_m = head_loc_m;
         next_head_loc_n = head_loc_n - 1;
-        next_move_dir   = 4; 
+        next_move_dir   = 4;
     elseif action == 2 % forward
         next_head_loc_m = head_loc_m - 1;
         next_head_loc_n = head_loc_n;

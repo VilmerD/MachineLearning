@@ -20,9 +20,7 @@
 % --------- DO NOT CHANGE ANYTHING BELOW UNLESS OTHERWISE NOTIFIED! -------
 
 % Begin with a clean sheet.
-clc;
 close all;
-clearvars;
 
 % Ensure same randomization process (repeatability).
 rng(5);
@@ -53,12 +51,11 @@ rewards = struct('default', 0, 'apple', 1, 'death', -1);
 % Discount factor gamma - ALLOWED TO BE CHANGED
 % Experiment with gamm; set it to 0, 1 and some values in (0,1). 
 % What happens in the respective cases (SEE EXERCISE 6)?
-gamm = .95;
+gamm = 0.95;
 
 % Tolerance in policy evaluation - ALLOWED TO BE CHANGED
 % Experiment with different tolerances (try as small as 1e-4, up to as
 % large as 1e4). Does the tolerance affect the final policy (SEE EXERCISE 6)?
-pol_eval_tol = 1e-1;
 
 % Updates per second (when watching the agent play).
 updates_per_sec = 5;
@@ -107,7 +104,7 @@ figure; imagesc(grid_show)
 % plays optimally, so in case of optimal play this is an infinite loop) and
 % the game ends.
 disp('Running the small Snake game!');
-while 1
+while 0
     
     % Choose action given state and policy.
     state     = grid_to_state_4_tuple(grid);
