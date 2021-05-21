@@ -47,13 +47,13 @@ test_agent = false; % set to true when you want to test your agent
 updates_per_sec = 20; % Allowed to be changed (though your code must handle at least 20 updates per sec)
 
 % Hint: Set to 0 when training / testing for long time
-show_fraction = 1e-3; % Allowed to be changed. 1: show everything, 0: show nothing, 0.1: show every tenth, and so on...
+show_fraction = 1/1900; % Allowed to be changed. 1: show everything, 0: show nothing, 0.1: show every tenth, and so on...
 
 % Stuff related to learning agent (YOU SHOULD EXPERIMENT A LOT WITH THESE
 % SETTINGS - SEE EXERCISE 8)
 nbr_feats = 3;                                                  % Number of state-action features per action
 rewards   = struct('default', 0, 'apple', 1, 'death', -1);     % Experiment with different reward signals, to see which yield a good behaviour for the agent
-gamm      = 0.950;                                              % Discount factor in Q-learning
+gamm      = 0.900;                                              % Discount factor in Q-learning
 alph      = 0.100;                                              % Learning rate in Q-learning
 eps       = 0.020;                                              % Random action selection probability in epsilon-greedy Q-learning (lower: increase exploitation, higher: increase exploration)
 
@@ -65,7 +65,7 @@ eps_update_factor  = 0.5; % At eps update: new eps = old eps * eps_update_factor
 
 % Initial weights. REMEMBER: weights should be set as 1's and -1's in a
 % BAD WAY with respect to your chosen features (see Exercise 8) .
-init_weights = [-1;1;-1];
+init_weights = [-1;1;1];
 % init_weights = [0.0641; -1.5058; 0.6625];
 % init_weights = [-1;1;1] ...
 
@@ -76,7 +76,7 @@ if test_agent
     nbr_ep = 100; % Get average test score over 100 episodes
     alph   = 0; % Learning rate in Q-learning
     eps    = 0; % Random action selection probability in epsilon-greedy Q-learning (lower: increase exploitation, higher: increase exploration)
-    load weights % Load agent Q-values for testing
+    load weights.mat % Load agent Q-values for testing
     disp('Testing agent!')
     disp('Successfully loaded Q-weights!')
 else

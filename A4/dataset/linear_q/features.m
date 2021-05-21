@@ -132,10 +132,3 @@ if numel(dist) == 0
 end
 end
 
-% Finds the body of the snake
-function pos = body_position(grid)
-[row, col] = find(grid(2:end-1, 2:end-1) == 1);
-row = row + 1;
-col = col + 1;
-pos = [row, col];
-end

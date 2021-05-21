@@ -97,8 +97,8 @@ for action = 1 : 3 % Evaluate all the different actions (left, forward, right).
     % by something more sensible.
     
     % angle to apple?
-    state_action_feats(1, action) = ...
-        apple_angle(grid, head_location, next_movement_dir);
+    [cb, appledist, appleangle] = apple_angle(grid, head_location, next_movement_dir);
+    state_action_feats(1, action) = cb;
     % Angle is 1 if snake is moving towards apple, -1 if moving away. Thus
     % a good weight is positive. Also, it only cares if the angle is
     % positive or negative, so it moves in straight lines.
@@ -108,19 +108,21 @@ for action = 1 : 3 % Evaluate all the different actions (left, forward, right).
     % The snake should avoid obstacles, so a good action this feat is
     % negative, and thus a good weight is negative.
     
-    state_action_feats(3, action) = scan22(grid, head_location, ...
-        next_movement_dir);
+    dmax = min(N, appledist);
+    cmin = 1;
+    state_action_feats(3, action) = snake_scan(grid, next_head_location, ...
+        next_movement_dir, dmax, cmin);
     
     state_action_feats = state_action_feats(1:nbr_feats, :);
 end
 end
 
 % Movement direction
-function d = vectorized_movement_direction(move_dir)
+function d = vectorized_movement_direction(movement_direction)
 % Input:    move_dir
 % Returns:  vectorized movement direction in 2d
-move_dir = mod(move_dir, 4);
-switch move_dir
+movement_direction = mod(movement_direction, 4);
+switch movement_direction
     case 1
         d = [-1, 0];
     case 2
@@ -133,18 +135,21 @@ end
 end
 
 % Angle to apple
-function cb = apple_angle(grid, head_location, movement_direction)
+function [cb, appledist, appleangle] = apple_angle(grid, head_location, movement_direction)
 % Input:    grid, head_location, movement_direction
 % Returns:  (binary) 1 if the snake is moving towards the apple and
 %           -1 if it is moving away from the apple
 [rows_apple, cols_apple] = find(grid == -1);
 apple = [rows_apple, cols_apple];
 v = apple-head_location;
-vn = v/norm(v);
+appledist = norm(v);
+vn = v/appledist;
 
 d = vectorized_movement_direction(movement_direction);  % Vectorized
-c = vn*d';                                              % cos(angle)
-cb = (c > 0) - (c == -1);
+appleangle = vn*d';                                     % cos(angle)
+cmin = 0;
+cb = (appleangle > cmin) - ...
+    (appleangle <= cmin)*abs(appleangle)^1;
 end
 
 % How many obstacles there are at a position in the grid
@@ -156,151 +161,36 @@ obs = grid(pos(1), pos(2)) == 1;
 on = obs;
 end
 
-function davrg = scan3(grid, head_location, movement_direction)
-[M, N] = size(grid);
-A = M*N;
-dmax = N/4;
-dmin = 8;
-% Ignoring walls and head location, so the snake only avoids it's own body
-grid(:, 1) = 0; grid(:, N) = 0;
-grid(1, :) = 0; grid(M, :) = 0;
+% Scans for body parts in the direction
+function obs = snake_scan(grid, head_location, movement_direction, ...
+    dmax, cmin)
+% Input:    grid, head_location, movement_direction, dmax, cmin
+% Returns:  if any snake body parts are within dmax units of distance and
+%           whos angle to the head is less than or equal to cmin
+
 grid(head_location(1), head_location(2)) = 0;
-h = sub2ind(size(grid), head_location(1), head_location(2));
+pos = body_position(grid) - head_location;
 
-skip1 = (N+1);
-s1 = sign(1 - (movement_direction - 2.5)^2);
-iend = A*(s1>0) + 1*(s1<0);
-L1 = grid(h:s1*skip1:iend);
-d1 = find(L1 == 1, 1, 'first')*sqrt(2);
-if numel(d1) == 0
-    d1 = dmax;
+% Find the distance between the head and the body parts, and the vectors to
+% them
+dist = sqrt(pos(:, 1).^2 + pos(:, 2).^2);
+vectors = pos./dist;
+d = vectorized_movement_direction(movement_direction);
+angles = vectors*d';
+
+% Find the body parts whos angle is leq to cmin, and who are close enough
+violating_index = logical((angles >= cmin).*(dist <= dmax));
+parts_tot = sum(angles(violating_index));
+obs = 2*(parts_tot >= 1) - 1;
 end
 
-skip2 = (N-1);
-s2 = sign(2.5 - movement_direction);
-iend = A*(s2>0) + 1*(s2<0);
-L2 = grid(h:s2*skip2:iend);
-d2 = find(L2 == 1, 1, 'first')*sqrt(2);
-if numel(d2) == 0
-    d2 = dmax;
+function pos = body_position(grid)
+[row, col] = find(grid(2:end-1, 2:end-1) == 1);
+row = row + 1;
+col = col + 1;
+pos = [row, col];
 end
 
-r = (mod(movement_direction, 2) == 0);
-skip3 = N*r + 1*~r;
-s3 = s1;
-n = abs(head_location(1*~r + 2*r) - N*(s2 > 0));
-iend = max(min(h + s3*skip3*n, A), 1);
-L3 = grid(h:s3*skip3:iend);
-d3 = find(L3 == 1, 1, 'first');
-if numel(d3) == 0
-    d3 = dmax;
-end
-
-d = [d1; d2; d3]/dmax;
-d = min(d, ones(3, 1));
-d = d.*(d > dmin/dmax);
-
-davrg = 2*max(d) - 1;
-end
-
-function davrg = scan2(grid, head_location, movement_direction)
-[M, N] = size(grid);
-A = M*N;
-dmax = N/2;
-dmin = N/7;
-% Ignoring walls and head location, so the snake only avoids it's own body
-grid(:, 1) = 0; grid(:, N) = 0;
-grid(1, :) = 0; grid(M, :) = 0;
-grid(head_location(1), head_location(2)) = 0;
-h = sub2ind(size(grid), head_location(1), head_location(2));
-
-skip1 = (N+1);
-s1 = sign(1 - (movement_direction - 2.5)^2);
-iend = A*(s1>0) + 1*(s1<0);
-L1 = grid(h:s1*skip1:iend);
-d1 = find(L1 == 1, 1, 'first');
-if numel(d1) == 0
-    d1 = dmax;
-end
-
-skip2 = (N-1);
-s2 = sign(2.5 - movement_direction);
-iend = A*(s2>0) + 1*(s2<0);
-L2 = grid(h:s2*skip2:iend);
-d2 = find(L2 == 1, 1, 'first');
-if numel(d2) == 0
-    d2 = dmax;
-end
-d = [d1-1; d2-1]/(dmax-1);
-d = min(d, ones(2, 1));
-d = (d > dmin/dmax*ones(2, 1));
-
-davrg = max(d);
-end
-
-function davrg = scan22(grid, head_location, movement_direction)
-[M, N] = size(grid);
-dmax = 6;
-dmin = 0;
-% Ignoring walls and head location, so the snake only avoids it's own body
-grid(:, 1) = 0; grid(:, N) = 0;
-grid(1, :) = 0; grid(M, :) = 0;
-hr = head_location(1);
-hc = head_location(2);
-grid(hr, hc) = 0;
-h = sub2ind(size(grid), head_location(1), head_location(2));
-
-step = -(N-1);
-imax = h + step*min(hr, hc);
-imax = max(1, min(N, imax));
-LL1 = grid(h:step:imax);
-
-step = (N-1);
-imax = h + step*(N-max(hr, hc));
-imax = max(1, min(N, imax));
-LL2 = grid(h:step:imax);
-
-step = (N+1);
-imax = h + step*min(hr, hc);
-imax = max(1, min(N, imax));
-LL3 = grid(h:step:imax);
-
-step = -(N+1);
-imax = h + step*(N-max(hr, hc));
-imax = max(1, min(N, imax));
-LL4 = grid(h:step:imax);
-switch movement_direction
-    case 1
-        L1 = LL1;
-        L2 = LL2;
-        L3 = grid(hr, hc:-1:1);
-    case 2
-        L1 = LL2;
-        L2 = LL3;
-        L3 = grid(hr:N, hc);
-    case 3
-        L1 = LL3;
-        L2 = LL4;
-        L3 = grid(hr, hc:M);
-    case 4
-        L1 = LL4;
-        L2 = LL1;
-        L3 = grid(hr:-1:1, hc);
-end
-d1 = find(L1 == 1, 1, 'first');
-d2 = find(L2 == 1, 1, 'first');
-d3 = find(L3 == 1, 1, 'first');
-
-if numel(d1) == 0 d1 = dmax; end
-if numel(d2) == 0 d2 = dmax; end
-if numel(d3) == 0 d3 = dmax; end
-d = ([d1; d2; d3] -1)/(dmax-1);
-d = min(d, ones(3, 1));
-d = d.*(d > dmin/dmax*ones(3, 1));
-
-davrg = max(d(1:2));
-end
-% Gets the information for the next state
 function [next_head_loc, next_move_dir] = get_next_info(action, movement_dir, head_loc)
 % Function to infer next haed location and movement direction
 
