@@ -104,7 +104,11 @@ for action = 1 : 3 % Evaluate all the different actions (left, forward, right).
     % positive or negative, so it moves in straight lines.
     
     % obsticle if taking action
-    state_action_feats(2, action) = obstacles(grid, next_head_location);
+%     state_action_feats(2, action) = obstacles(grid, next_head_location);
+%     state_action_feats(2, action) = obstacles2(grid, next_head_location);
+    dmax = min(N, appledist);
+    cmin = 1;
+    state_action_feats(2, action) = obstacles(grid, next_head_location);    
     % The snake should avoid obstacles, so a good action this feat is
     % negative, and thus a good weight is negative.
     
@@ -148,8 +152,7 @@ vn = v/appledist;
 d = vectorized_movement_direction(movement_direction);  % Vectorized
 appleangle = vn*d';                                     % cos(angle)
 cmin = 0;
-cb = (appleangle > cmin) - ...
-    (appleangle <= cmin)*abs(appleangle)^1;
+cb = (appleangle > cmin) - (appleangle <= cmin)*abs(appleangle)^4;
 end
 
 % How many obstacles there are at a position in the grid
